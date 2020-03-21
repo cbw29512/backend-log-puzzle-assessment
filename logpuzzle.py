@@ -19,9 +19,13 @@ Here's what a puzzle url looks like:
 import os
 import re
 import sys
-import urllib
 import argparse
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
 
+__author__ = "Chris Wilson, Koren Nyles, Sean Bailey, Kano Marvel, Chelsea White"
 
 def read_urls(filename):
     """Returns a list of the puzzle urls from the given log file,
@@ -29,8 +33,27 @@ def read_urls(filename):
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
     # +++your code here+++
-    pass
+    puzzle_urls = []
+    with open(filename, 'r') as log_file:
+        log_list = log_file.read().split('\n')
+        log_list = list(filter(lambda x: ('/puzzle/' in x), log_list))
+        for url in log_list:
+            url_result = re.findall(r'GET (\S+) HTTP', url)
+            puzzle_urls.append(url_result[0])
+    url_list = create_urls(puzzle_urls)
+    url_list = list(set(url_list))
+    sorted_urls = sorted(url_list, key=return_last_word)
+    print(sorted_urls)
+    return sorted_urls
 
+def create_urls(urls):
+    front = 'http://code.google.com'
+    url_returns = [front + url for url in urls]
+    return url_returns
+
+def return_last_word(url):
+    return re.findall(r'-(....).jpg', url)
+create_urls('animal_code.google.com')
 
 def download_images(img_urls, dest_dir):
     """Given the urls already in the correct order, downloads
@@ -41,35 +64,39 @@ def download_images(img_urls, dest_dir):
     Creates the directory if necessary.
     """
     # +++your code here+++
-    pass
-
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+        print('dir made')
+    index_html = '<html><body>'
+    for index, url in enumerate(img_urls):
+        image_name = 'img' + str(index)
+        print('Retrieving {}'.format(url))
+        urlretrieve(url, dest_dir + '/' + image_name)
+        index_html += '<img src = {}></img>'.format(image_name)
+    index_html += '</body></html>'
+    with open(dest_dir + '/index.html', 'w') as write_index:
+        write_index.write(index_html)
 
 def create_parser():
     """Create an argument parser object"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--todir',  help='destination directory for downloaded images')
+    parser.add_argument('-d', '--todir', help='destination directory for downloaded images')
     parser.add_argument('logfile', help='apache logfile to extract urls from')
-
     return parser
-
 
 def main(args):
     """Parse args, scan for urls, get images from urls"""
     parser = create_parser()
-
     if not args:
         parser.print_usage()
         sys.exit(1)
-
     parsed_args = parser.parse_args(args)
-
     img_urls = read_urls(parsed_args.logfile)
-
     if parsed_args.todir:
         download_images(img_urls, parsed_args.todir)
     else:
         print('\n'.join(img_urls))
 
-
 if __name__ == '__main__':
     main(sys.argv[1:])
+    
