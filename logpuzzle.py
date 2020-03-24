@@ -12,7 +12,10 @@ http://code.google.com/edu/languages/google-python-class/
 Given an apache logfile, find the puzzle urls and download the images.
 
 Here's what a puzzle url looks like:
-10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+10.254.254.28 - - [06/Aug/2007:00:13:48 -0700]
+"GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-"
+"Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6)
+Gecko/20070725 Firefox/2.0.0.6"
 
 """
 
@@ -25,7 +28,8 @@ if sys.version_info[0] >= 3:
 else:
     from urllib import urlretrieve
 
-__author__ = "Chris Wilson, Koren Nyles, Sean Bailey, Kano Marvel, Chelsea White"
+__author__ = "Chris Wilson,Koren, Sean, Kano, Chelsea, GoogleFu"
+
 
 def read_urls(filename):
     """Returns a list of the puzzle urls from the given log file,
@@ -46,14 +50,19 @@ def read_urls(filename):
     print(sorted_urls)
     return sorted_urls
 
+
 def create_urls(urls):
     front = 'http://code.google.com'
     url_returns = [front + url for url in urls]
     return url_returns
 
+
 def return_last_word(url):
     return re.findall(r'-(....).jpg', url)
+
+
 create_urls('animal_code.google.com')
+
 
 def download_images(img_urls, dest_dir):
     """Given the urls already in the correct order, downloads
@@ -77,12 +86,15 @@ def download_images(img_urls, dest_dir):
     with open(dest_dir + '/index.html', 'w') as write_index:
         write_index.write(index_html)
 
+
 def create_parser():
     """Create an argument parser object"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--todir', help='destination directory for downloaded images')
+    parser.add_argument(
+        '-d', '--todir', help="destination directory for downloaded images")
     parser.add_argument('logfile', help='apache logfile to extract urls from')
     return parser
+
 
 def main(args):
     """Parse args, scan for urls, get images from urls"""
@@ -97,6 +109,6 @@ def main(args):
     else:
         print('\n'.join(img_urls))
 
+
 if __name__ == '__main__':
     main(sys.argv[1:])
-    
